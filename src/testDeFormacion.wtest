@@ -1,0 +1,82 @@
+import trenes.*
+
+
+describe "test sobre las formaciones"{
+	
+	var thomas= new Locomotora( 
+		peso = 1000, 
+		velocidadMax = 100,
+		 arrastreMaximo =10000
+	) 
+	
+	var fernando= new Locomotora(
+		 peso = 1000, 
+		 velocidadMax = 80,
+		 arrastreMaximo =10000
+	) 
+	
+	var coche= new VagonDePasajeros( 
+		largo = 1, 
+		ancho = 5
+	)
+	
+	var coche1= new VagonDePasajeros( 
+		largo = 10,
+		ancho = 5
+	)
+	
+	var carguero= new VagonDeCarga( 
+		cargaMax = 1000
+	)
+	
+	var formacion = new Formaciones( 
+		locomotoras=[thomas, fernando],
+		vagones=[coche, coche1,carguero]
+	)
+	
+	var formacion1 = new Formaciones( 
+		locomotoras=[thomas, fernando],
+		vagones=[coche, coche1]
+	)
+	
+	var deposito= new Deposito(
+			formaciones=[formacion, formacion1],
+			locomotorasSueltas=[]
+	)
+	
+	test "vagones livianos"{
+		assert.equals(2, formacion.cantVagonesLivianos() )
+	}
+	
+	test "velocidad max de la formacion"{
+		assert.equals(80, formacion.velocidadMaxDeFormaciones() )
+	}
+	
+	test "formacion eficiente"{
+		assert.that( formacion.formacionEficiente() )
+	}
+	
+	test "formacion Puede Moverse"{
+		assert.that( formacion.formacionPuedeMoverse() )
+	}
+	
+	test "kilos que le faltan a la formacion"{
+		assert.equals(0, formacion.kilosFaltantes() )
+	}
+	
+	test "conjunto de vagones pesados de formaciones"{
+		assert.equals(#{coche1,coche1}, deposito.vagonesPesados() )
+	}
+	
+	
+	
+		
+}
+
+
+
+
+
+
+
+
