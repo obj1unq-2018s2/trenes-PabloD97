@@ -7,7 +7,16 @@ class Locomotora{
 
 }
 
-class VagonDePasajeros{
+
+
+
+//			VAGONES
+
+class Vagon{
+	method banios()= 0
+}
+
+class VagonDePasajeros inherits Vagon   {
 	
 	var largo
 	var ancho
@@ -22,9 +31,14 @@ class VagonDePasajeros{
 	method cargaMax(){
 		return self.pasajerosQuePuedeTransportar() * 80
 	}
+	
+	override method banios(){
+		return self.pasajerosQuePuedeTransportar() / 50
+	} 
+
 }
 
-class VagonDeCarga{
+class VagonDeCarga  inherits Vagon {
 	var property cargaMax
 	
 	method cargaMax(){
@@ -32,10 +46,18 @@ class VagonDeCarga{
 	}
 	
 	method pasajerosQuePuedeTransportar()= 0
+	
+	override method banios()= 0 
 }
 
 
-class Formaciones{
+
+
+
+
+//					Formaciones
+
+class Formaciones {
 	var property locomotoras
 	var property vagones
 	
@@ -49,7 +71,7 @@ class Formaciones{
 	}
 	
 	method pasajeros(){
-		vagones.map({ vagon=>vagon.pasajerosQuePuedeTransportar()}).sum()
+		return vagones.map({ vagon=>vagon.pasajerosQuePuedeTransportar()}).sum()
 	}
 	
 	method cantVagonesLivianos(){
@@ -77,6 +99,7 @@ class Formaciones{
 	
 	method formacionPuedeMoverse(){
 		return self.arrastreUtilTotal() >= self.pesoMaxTotal()	
+	
 	}
 	
 	method kilosFaltantes(){
@@ -105,22 +128,106 @@ class Formaciones{
 	method esCompleja(){
 		return self.cantidadDeUnidades() > 20 or self.pesoTotal() > 10000
 	}
+	
+	method bienArmada(){
+		return self.formacionPuedeMoverse() 
+	}
 }
 
 
+//    		FORMACION DE CORTA DISTANCIA
+class FormacionCortaDistancia inherits Formaciones {
+	
+	
+	override method bienArmada(){
+		return super() and not(self.esCompleja()) 
+	}
+	
+	override method velocidadMaxDeFormaciones(){
+		return super().min(60)
+	}
+}
+
+
+// 				FORMACION DE LARGA DISTANCIA
+class FormacionLargaDistancia inherits Formaciones {
+	
+	var property uneDosCiudadesGrandes
+	 
+	
+	method baniosTotales(){
+		return	vagones.map({
+					vagon => vagon.banios()
+				}).sum()
+	}
+	
+ 	method baniosSufiecientes(){
+ 		return self.baniosTotales() == self.pasajeros() / 50
+	}
+	
+	override method bienArmada(){
+		return super() && self.baniosSufiecientes()
+	}
+
+	override method velocidadMaxDeFormaciones(){
+		return if(uneDosCiudadesGrandes){ 200 }
+			else{ 150 }
+	}
+}
+
+//				 FORMACION DE ALTA VELOCIDAD
+class TrenDeAltaVelocidad inherits FormacionLargaDistancia {
+	
+	
+	const velocidadMinima=250 
+	
+	method sonTodosLosVagonesLivianos(){
+		return self.cantVagonesLivianos() == vagones.size()
+	}
+	
+	override method velocidadMaxDeFormaciones(){
+		return locomotoras.min({ locomotora=> 
+								 locomotora.velocidadMax()}).velocidadMax()
+	}
+	
+	override method bienArmada(){
+		return 
+			self.sonTodosLosVagonesLivianos() 
+			and 
+			self.velocidadMaxDeFormaciones() > velocidadMinima
+	}
+	
+}
+
+// 				DEPOSITO
 class Deposito{
 	var property formaciones
 	var property locomotorasSueltas
 	
-	method agregarLocomotoraSuelta(formacion){
-		formacion.locomotoras.add(locomotorasSueltas.anyOne())
-	}
-	
+
 	method vagonesPesados(){
 		return	formaciones.map(
 			{ formacion=>formacion.vagonMasPesado() }).asSet()
 	}
+	
+	method necesitaConductorExperimentado(){
+		return formaciones.any({formacion => formacion.esCompleja()})
+	}
+	
+	method agregarLocomotora(formacion){
+		var locomotoraUtil = locomotorasSueltas.find({
+				locomotora=> 
+					locomotora.arrastreUtil() >= formacion.kilosFaltantes()
+		})
+		
+		if(not formacion.formacionPuedeMoverse()){
+			formacion.agregarLocomotora(locomotoraUtil)
+			locomotorasSueltas.remove(locomotoraUtil)
+		}
+	}
+	
 }
+
 
 
 

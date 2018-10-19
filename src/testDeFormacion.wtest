@@ -3,6 +3,7 @@ import trenes.*
 
 describe "test sobre las formaciones"{
 	
+	//PRIMERA FORMACION
 	var thomas= new Locomotora( 
 		peso = 1000, 
 		velocidadMax = 100,
@@ -29,48 +30,192 @@ describe "test sobre las formaciones"{
 		cargaMax = 1000
 	)
 	
+	//SEGUNDA FORMACION
+	var german= new Locomotora(
+		peso = 1000,
+		velocidadMax= 80,
+		arrastreMaximo = 8000		
+	)
+	
+	var coche2= new VagonDePasajeros( 
+		largo = 6, 
+		ancho = 5
+	)
+	
+	var coche3= new VagonDePasajeros( 
+		largo = 2, 
+		ancho = 5
+	)
+	
+	
+	//TERCERA FORMACION
+	var coche4= new VagonDePasajeros(
+		largo = 3, 
+		ancho = 5
+	)
+	
+	//FORMACION DE CORTA DISTANCIA
+	var locomotoraCortaDistancia= new Locomotora( 
+		peso = 500, 
+		velocidadMax = 100,
+		arrastreMaximo = 5000
+	) 
+	
+	var cocheCortaDistancia= new VagonDePasajeros(
+		largo= 2,
+		ancho= 4
+	)
+	
+	var cocheCortaDistancia1= new VagonDePasajeros(
+		largo= 1,
+		ancho= 2
+	)
+	
+	//FORMACION DE LARGA DISTANCIA
+	var locomotoraLargaDistancia= new Locomotora( 
+		peso = 1000, 
+		velocidadMax = 100,
+		arrastreMaximo = 20000
+	) 
+	
+	var cocheLargaDistancia= new VagonDePasajeros(
+		largo= 10,
+		ancho= 3
+	)
+	
+	var cocheLargaDistancia1= new VagonDePasajeros(
+		largo= 5,
+		ancho= 3
+	)
+	
+	//TREN DE ALTA VELOCIDAD
+	var trenBala= new Locomotora(
+		peso=500,
+		velocidadMax= 251,
+		arrastreMaximo=10000
+	)
+	
+	var cocheDeTrenBala= new VagonDePasajeros(
+		largo= 1,
+		ancho= 1
+	)
+	
+	var cocheDeTrenBala1= new VagonDePasajeros(
+		largo= 1,
+		ancho= 2
+	)
+	
+	//LOCOMOTORA SUELTA
+	var pablo = new Locomotora(
+		peso= 2000,
+		velocidadMax = 100,
+		arrastreMaximo= 15000
+	)
+	
+	//FORMACIONES
 	var formacion = new Formaciones( 
 		locomotoras=[thomas, fernando],
 		vagones=[coche, coche1,carguero]
 	)
 	
 	var formacion1 = new Formaciones( 
-		locomotoras=[thomas, fernando],
-		vagones=[coche, coche1]
+		locomotoras=[german],
+		vagones=[coche2, coche3]
 	)
 	
+	var formacion2= new Formaciones(
+		locomotoras=[],
+		vagones=[coche4]
+	)
+	
+	var formacionCorta= new FormacionCortaDistancia(
+		locomotoras=[locomotoraCortaDistancia],
+		vagones=[cocheCortaDistancia1,cocheCortaDistancia]
+	)
+	
+	var formacionLarga= new FormacionLargaDistancia(
+		locomotoras=[locomotoraLargaDistancia],
+		vagones=[cocheLargaDistancia1,cocheLargaDistancia]
+	)
+	
+	var formacionDeAltaVelocidad= new TrenDeAltaVelocidad(
+		locomotoras=[trenBala],
+		vagones=[cocheDeTrenBala1,cocheDeTrenBala]
+	)
+	
+	//DEPOSITO
 	var deposito= new Deposito(
-			formaciones=[formacion, formacion1],
-			locomotorasSueltas=[]
+			formaciones=[formacion, formacion1, formacion2],
+			locomotorasSueltas=[pablo]
 	)
 	
+	//1
 	test "vagones livianos"{
 		assert.equals(2, formacion.cantVagonesLivianos() )
 	}
 	
+	//2
 	test "velocidad max de la formacion"{
 		assert.equals(80, formacion.velocidadMaxDeFormaciones() )
 	}
 	
+	//3
 	test "formacion eficiente"{
 		assert.that( formacion.formacionEficiente() )
 	}
 	
+	//4
 	test "formacion Puede Moverse"{
 		assert.that( formacion.formacionPuedeMoverse() )
 	}
 	
+	//5
 	test "kilos que le faltan a la formacion"{
 		assert.equals(0, formacion.kilosFaltantes() )
 	}
 	
+	//6
 	test "conjunto de vagones pesados de formaciones"{
-		assert.equals(#{coche1,coche1}, deposito.vagonesPesados() )
+		assert.equals(#{coche1,coche2,coche4}, deposito.vagonesPesados() )
 	}
 	
+	//7
+	test "formacion necesita conductor experimentado"{
+		assert.that( deposito.necesitaConductorExperimentado() )
+	}
 	
+	//8
+	test "agregar locomotora del deposito a una formacion"{
+		deposito.agregarLocomotora(formacion2)
+		assert.equals([pablo]  , formacion2.locomotoras() )
+		assert.equals([], deposito.locomotorasSueltas())
+	}
 	
-		
+	//9
+	test "formacion de corta distancia bien armada"{
+		assert.that( formacionCorta.bienArmada() )
+	}
+	
+	test "formacion de larga distancia bien armada"{
+		assert.that( formacionLarga.bienArmada() )
+	}
+	
+	//10
+	test "velocidad maxima de tren de corta distancia"{
+		assert.equals(60, formacionCorta.velocidadMaxDeFormaciones() )
+	}
+	
+	test "velocidad maxima de tren de larga distancia "{
+		formacionLarga.uneDosCiudadesGrandes(true)
+		assert.equals( 200, formacionLarga.velocidadMaxDeFormaciones() )
+		formacionLarga.uneDosCiudadesGrandes(false)
+		assert.equals( 150, formacionLarga.velocidadMaxDeFormaciones() )
+	}
+	
+	//11
+	test "tren de alta velocidad bien armado"{
+		assert.that( formacionDeAltaVelocidad.bienArmada() )
+	}
 }
 
 
